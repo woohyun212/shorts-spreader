@@ -1,0 +1,3 @@
+body[data-shorts-spreader-placeholder='true'] {
+  outline: 2px dashed #7c3aed;
+}
