@@ -211,20 +211,62 @@ function attachOverlay(payload, shortsAssets) {
   overlay.style.border = '1px solid rgba(255, 206, 143, 0.45)';
   overlay.style.overflow = 'hidden';
 
+  const mediaContainer = document.createElement('div');
+  mediaContainer.style.position = 'relative';
+  mediaContainer.style.width = '240px';
+  mediaContainer.style.height = '427px';
+  mediaContainer.style.borderRadius = '12px 12px 0 0';
+  mediaContainer.style.overflow = 'hidden';
+  mediaContainer.style.background = '#000';
+
+  if (shortsAssets.thumbnailUrl) {
+    const thumb = document.createElement('a');
+    thumb.href = shortsAssets.shortsUrl;
+    thumb.target = '_blank';
+    thumb.rel = 'noopener noreferrer';
+    thumb.style.display = 'block';
+    thumb.style.width = '100%';
+    thumb.style.height = '100%';
+
+    const thumbImg = document.createElement('img');
+    thumbImg.src = shortsAssets.thumbnailUrl;
+    thumbImg.style.width = '100%';
+    thumbImg.style.height = '100%';
+    thumbImg.style.objectFit = 'cover';
+    thumb.appendChild(thumbImg);
+
+    const playIcon = document.createElement('div');
+    playIcon.textContent = '\u25B6';
+    playIcon.style.position = 'absolute';
+    playIcon.style.top = '50%';
+    playIcon.style.left = '50%';
+    playIcon.style.transform = 'translate(-50%, -50%)';
+    playIcon.style.fontSize = '48px';
+    playIcon.style.color = 'rgba(255,255,255,0.85)';
+    playIcon.style.textShadow = '0 2px 8px rgba(0,0,0,0.5)';
+    playIcon.style.pointerEvents = 'none';
+    thumb.appendChild(playIcon);
+
+    mediaContainer.appendChild(thumb);
+  }
+
   if (shortsAssets.embedUrl) {
     const muted = payload?.hitMuted === true;
     const muteParam = muted ? '&mute=1' : '';
     const iframe = document.createElement('iframe');
     iframe.src = shortsAssets.embedUrl + muteParam;
-    iframe.style.width = '240px';
-    iframe.style.height = '427px';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
     iframe.style.border = 'none';
-    iframe.style.display = 'block';
-    iframe.style.borderRadius = '12px 12px 0 0';
     iframe.allow = 'autoplay; encrypted-media';
     iframe.setAttribute('allowfullscreen', '');
-    overlay.appendChild(iframe);
+    mediaContainer.appendChild(iframe);
   }
+
+  overlay.appendChild(mediaContainer);
 
   const info = document.createElement('div');
   info.style.padding = '8px 10px';
