@@ -42,6 +42,34 @@ export default function useWebSocket() {
         });
       })
       .catch(() => {});
+
+    fetch('/api/logs')
+      .then((r) => r.json())
+      .then((data) => {
+        const logs = data?.ok && Array.isArray(data.data) ? data.data : [];
+        const restored = logs.slice(0, 50).map((entry) => {
+          if (entry.type === 'hit') {
+            return {
+              id: (entry.spreadId || '') + '_' + (entry.victimClientId || Date.now()),
+              type: 'hit',
+              victimName: entry.victimName || '',
+              siteDomain: entry.siteDomain || '',
+              replacedTagType: entry.replacedTagType || '',
+              timestamp: entry.timestamp || entry.createdAt,
+            };
+          }
+          return {
+            id: entry.spreadId || '',
+            type: 'spread',
+            spreaderName: entry.spreaderName || '',
+            shortsTitle: entry.shortsTitle || '',
+            victimCount: entry.victimClientIds?.length || 0,
+            timestamp: entry.createdAt || entry.timestamp,
+          };
+        });
+        setEvents(restored);
+      })
+      .catch(() => {});
   }, []);
 
   const addEvent = useCallback((event) => {
