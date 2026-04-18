@@ -160,7 +160,36 @@ function Leaderboard({ leaderboard }) {
 }
 
 export default function DashboardPage() {
-  const { stats, events, leaderboard, isConnected } = useWebSocket();
+  const { stats, events, isConnected } = useWebSocket();
+  const [leaderboard, setLeaderboard] = useState({ spreaders: [], hitters: [], sites: [] });
+  const debounceRef = useRef(null);
+  const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    const fetchLeaderboard = () => {
+      fetch('/api/leaderboard')
+        .then((r) => r.json())
+        .then((data) => {
+          const payload = data?.ok && data.data ? data.data : data || {};
+          setLeaderboard({
+            spreaders: payload.spreaders || [],
+            hitters: payload.hitters || [],
+            sites: payload.sites || [],
+          });
+        })
+        .catch(() => {});
+    };
+
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      fetchLeaderboard();
+      return;
+    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(fetchLeaderboard, 3000);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [stats.totalSpreads, stats.totalHits]);
 
   return (
     <div className="dashboard">
